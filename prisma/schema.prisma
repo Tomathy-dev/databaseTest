@@ -6,23 +6,48 @@ generator client {
 }
 
 datasource db {
-  provider = "mysql"
-  url      = env("DATABASE_URL")
+  provider = "sqlite"
+  url      = "file:./dev.sqlite"
 }
 
 model File {
-  id          Int     @id @default(autoincrement())
-  name        String
-  email       String?
-  phoneNumber Int?
-  personal    Boolean
+  id           Int      @id @default(autoincrement())
+  name         String
+  email        String?
+  phoneNumber  Int?
+  personal     Boolean
+  matter_final Int      @default(0)
+  matters      Matter[]
 }
 
 model Matter {
-  fileId     Int
-  matter     Int
-  department String
-  inCharge   Boolean
+  file        File          @relation(fields: [fileId], references: [id])
+  fileId      Int
+  matter      Int
+  department  String
+  inCharge    String
+  Transaction Transaction[]
 
   @@id([fileId, matter])
+}
+
+model Transaction {
+  id                Int      @id @default(autoincrement())
+  matter            Matter   @relation(fields: [matterFileId, matterMatter], references: [fileId, matter])
+  matterFileId      Int
+  matterMatter      Int
+  date              DateTime
+  transactionMethod String
+  description       String
+  value             Float
+  transactionType   String
+  Ledger            Ledger   @relation(fields: [bank], references: [name])
+  bank              String
+}
+
+model Ledger {
+  cardNumber  String        @id
+  name        String        @unique
+  totalValue  Float
+  Transaction Transaction[]
 }

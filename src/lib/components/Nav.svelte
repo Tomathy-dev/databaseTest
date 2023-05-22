@@ -1,10 +1,20 @@
+<script>
+	import { page } from '$app/stores';
+
+	$: routeId = $page.route.id;
+</script>
+
 <div class="wrapper">
 	<div class="logo">
 		<img alt="Database Icon" src="/database-icon.svg" width="55px" height="55px" />
 	</div>
 	<nav>
 		<ul class="mainNav">
-			<a href="/"><li><img alt="Financial Accounts" src="/money-icon.svg" /></li></a>
+			<a href="/"
+				><li class:active={routeId === '/'}>
+					<img alt="Financial Accounts" src="/money-icon.svg" />
+				</li></a
+			>
 			<a href="/"><li><img alt="File Database" src="/file-icon.svg" /></li></a>
 			<a href="/"><li><img alt="Lawyer Corner" src="/briefcase-icon.svg" /></li></a>
 		</ul>
@@ -13,7 +23,6 @@
 
 <style>
 	.wrapper {
-		width: 75px;
 		height: 100vh;
 		background-color: #00bcbc;
 		display: inline-block;
@@ -65,5 +74,9 @@
 	.mainNav li:hover {
 		background-color: #007a7a;
 		border-radius: 5px;
+	}
+	.active {
+		background-color: #007a7a;
+		border-radius: 5px !important;
 	}
 </style>

@@ -37,12 +37,12 @@ model Transaction {
   matterFileId      Int
   matterMatter      Int
   date              DateTime
-  transactionMethod String
   description       String
   value             Float
   transactionType   String
-  Ledger            Ledger   @relation(fields: [bank], references: [name])
-  bank              String
+  Ledger            Ledger?  @relation(fields: [bank], references: [name])
+  bank              String?
+  transactionMethod String
 }
 
 model Ledger {

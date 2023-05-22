@@ -5,26 +5,25 @@
 </script>
 
 <div class="body">
-	<div>
-		<Nav />
-	</div>
-	<div>
-		<slot />
-	</div>
+	<Nav />
+	<slot />
 </div>
 
 <style>
-	@import url('https://fonts.googleapis.com/css2?family=Ubuntu:wght@300;400;500;700&display=swap');
+	@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap');
 
-	:global(body) {
+	:global(body, html) {
 		margin: 0;
 		padding: 0;
-		font-family: 'Ubuntu', sans-serif;
+		font-family: 'Roboto', sans-serif;
 		font-weight: normal;
+		height: 100vh;
 	}
 
 	.body {
 		display: grid;
 		grid-template-columns: 75px 1fr;
+		height: 100%;
+		overflow: hidden;
 	}
 </style>

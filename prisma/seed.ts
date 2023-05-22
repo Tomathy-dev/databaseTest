@@ -37,6 +37,14 @@ async function main() {
 		});
 		console.log(file);
 	}
+
+	await prisma.ledger.create({
+		data: {
+			cardNumber: '1234567890123456',
+			name: 'Caixa Geral de depósitos',
+			totalValue: 1000000
+		}
+	});
 }
 
 main()

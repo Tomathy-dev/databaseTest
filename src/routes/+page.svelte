@@ -1,5 +1,10 @@
 <script lang="ts">
-	let file = '7017-02';
+	import type { PageServerData } from './$types';
+
+	export let data: PageServerData;
+	let indexChanged: Number[] = [];
+
+	$: ({ transactions } = data);
 </script>
 
 <div class="grid grid-rows-[128px_1fr] grid-cols-1 overflow-auto">
@@ -26,30 +31,80 @@
 			</form>
 			<img src="/add.svg" alt="Add icon" style="width: 40px" />
 		</div>
-		<table class="table table-fixed table-compact mx-9">
-			<thead class="border-2 border-slate-500 sticky top-[-2px]">
-				<th class="w-24">File</th>
-				<th class="w-28">Date</th>
-				<th class="w-32">Method</th>
-				<th class="w-7/12">Description</th>
-				<th>Debit</th>
-				<th>Credit</th>
+		<table class="table table-compact mx-9 ">
+			<thead class="border-2 border-slate-500 sticky top-0">
+				<tr class="z-0">
+					<th class="p-2 w-20">File</th>
+					<th class="p-2 w-20">Matter</th>
+					<th class="p-2 w-28">Date</th>
+					<th class="p-2 w-32">Method</th>
+					<th class="p-2 w-7/12">Description</th>
+					<th>Debit</th>
+					<th>Credit</th>
+				</tr>
 			</thead>
 			<tbody>
-				{#each Array.from(Array(100).keys()) as i}
-					<tr>
-						<td
-							><input
-								bind:value={file}
+				{#each transactions as t}
+					<tr
+						class="hover:outline-2 hover:outline-[#00bcbc] hover:outline transition-colors duration-200"
+					>
+						<td>
+							<input
+								on:change|once={() => {
+									if (!indexChanged.includes(t.id)) indexChanged.push(t.id);
+								}}
+								bind:value={t.matterFileId}
 								type="text"
 								class="px-2 focus:ring-2 focus:ring-[#00bcbc]"
-							/></td
-						>
-						<td>16/05/2023</td>
-						<td>TRF</td>
-						<td>Pagamento dos juros da Autoridade Tributária {i + 1}</td>
-						<td>0.00€</td>
-						<td>1'000.00€</td>
+							/>
+						</td>
+						<td>
+							<input
+								on:change|once={() => {
+									if (!indexChanged.includes(t.id)) indexChanged.push(t.id);
+								}}
+								bind:value={t.matterMatter}
+								type="text"
+								class="px-2 focus:ring-2 focus:ring-[#00bcbc]"
+							/>
+						</td>
+						<td>
+							<input
+								on:change|once={() => {
+									if (!indexChanged.includes(t.id)) indexChanged.push(t.id);
+								}}
+								bind:value={t.date}
+								type="date"
+								class="px-2 focus:ring-2 focus:ring-[#00bcbc]"
+							/>
+						</td>
+						<td>
+							<input
+								on:change|once={() => {
+									if (!indexChanged.includes(t.id)) indexChanged.push(t.id);
+								}}
+								bind:value={t.transactionMethod}
+								type="text"
+								class="px-2 focus:ring-2 focus:ring-[#00bcbc]"
+							/>
+						</td>
+						<td>
+							<input
+								on:change|once={() => {
+									if (!indexChanged.includes(t.id)) indexChanged.push(t.id);
+								}}
+								bind:value={t.description}
+								type="text"
+								class="px-2 focus:ring-2 focus:ring-[#00bcbc]"
+							/>
+						</td>
+						{#if t.transactionType === 'DEBIT'}
+							<td>{t.value}</td>
+							<td>--</td>
+						{:else}
+							<td>--</td>
+							<td>{t.value}</td>
+						{/if}
 					</tr>
 				{/each}
 			</tbody>

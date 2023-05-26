@@ -32,17 +32,17 @@ model Matter {
 }
 
 model Transaction {
-  id                Int      @id @default(autoincrement())
-  matter            Matter   @relation(fields: [matterFileId, matterMatter], references: [fileId, matter])
-  matterFileId      Int
-  matterMatter      Int
-  date              DateTime
-  description       String
-  value             Float
-  transactionType   String
-  Ledger            Ledger?  @relation(fields: [bank], references: [name])
-  bank              String?
+  id                Int    @id @default(autoincrement())
+  matterRelation    Matter @relation(fields: [file, matter], references: [fileId, matter])
+  file              Int
+  matter            Int
+  date              String
   transactionMethod String
+  description       String
+  creditValue       Float?
+  debitValue        Float?
+  Ledger            Ledger @relation(fields: [bank], references: [name])
+  bank              String
 }
 
 model Ledger {

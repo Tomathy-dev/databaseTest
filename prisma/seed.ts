@@ -45,6 +45,26 @@ async function main() {
 			totalValue: 1000000
 		}
 	});
+
+	await prisma.transaction.create({
+		data: {
+			matterRelation: {
+				connect: {
+					fileId_matter: {
+						fileId: 1,
+						matter: 1
+					}
+				}
+			},
+			date: '2023-05-25',
+			description: 'Teste',
+			creditValue: 1000,
+			Ledger: {
+				connect: { cardNumber: '1234567890123456' }
+			},
+			transactionMethod: 'CASH'
+		}
+	});
 }
 
 main()

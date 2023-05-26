@@ -2,7 +2,51 @@
 	import type { PageServerData } from './$types';
 
 	export let data: PageServerData;
-	let indexChanged: Number[] = [];
+
+	/**
+	 * Transaction type for creating object to be sent to server for update
+	 */
+	type TempTransaction = {
+		id: number;
+		file: number;
+		matter: number;
+		date: string;
+		transactionMethod: string;
+		description: string;
+		debitValue: number | null;
+		creditValue: number | null;
+	};
+
+	function createTransactionsChanged(): TempTransaction[] {
+		let transactionsChanged: TempTransaction[] = [];
+		for (let i = 0; i < indexChanged.length; i++) {
+			const index = indexChanged[i];
+			const transaction = transactions.find((t) => t.id === index);
+			if (transaction !== undefined) {
+				transactionsChanged.push({
+					id: transaction.id,
+					file: transaction.file,
+					matter: transaction.matter,
+					date: transaction.date,
+					transactionMethod: transaction.transactionMethod,
+					description: transaction.description,
+					debitValue: transaction.debitValue,
+					creditValue: transaction.creditValue
+				});
+			}
+		}
+		return transactionsChanged;
+	}
+
+	function onlyNumbers(event: Event) {
+		if (event !== undefined && event.target !== null) {
+			if (event.target instanceof HTMLInputElement) {
+				event.target.value = event.target.value.replace(/[^0-9]/g, '');
+			}
+		}
+	}
+
+	let indexChanged: number[] = []; // Indexes of transactions that have been changed
 
 	$: ({ transactions } = data);
 </script>
@@ -36,24 +80,22 @@
 				<tr class="z-0">
 					<th class="p-2 w-20">File</th>
 					<th class="p-2 w-20">Matter</th>
-					<th class="p-2 w-28">Date</th>
-					<th class="p-2 w-32">Method</th>
+					<th class="p-2 w-24">Date</th>
+					<th class="p-2 w-24">Method</th>
 					<th class="p-2 w-7/12">Description</th>
-					<th>Debit</th>
-					<th>Credit</th>
+					<th class="p-2 w-24">Debit</th>
+					<th class="p-2 w-24">Credit</th>
 				</tr>
 			</thead>
 			<tbody>
 				{#each transactions as t}
-					<tr
-						class="hover:outline-2 hover:outline-[#00bcbc] hover:outline transition-colors duration-200"
-					>
+					<tr>
 						<td>
 							<input
 								on:change|once={() => {
 									if (!indexChanged.includes(t.id)) indexChanged.push(t.id);
 								}}
-								bind:value={t.matterFileId}
+								bind:value={t.file}
 								type="text"
 								class="px-2 focus:ring-2 focus:ring-[#00bcbc]"
 							/>
@@ -63,7 +105,7 @@
 								on:change|once={() => {
 									if (!indexChanged.includes(t.id)) indexChanged.push(t.id);
 								}}
-								bind:value={t.matterMatter}
+								bind:value={t.matter}
 								type="text"
 								class="px-2 focus:ring-2 focus:ring-[#00bcbc]"
 							/>
@@ -98,12 +140,33 @@
 								class="px-2 focus:ring-2 focus:ring-[#00bcbc]"
 							/>
 						</td>
-						{#if t.transactionType === 'DEBIT'}
-							<td>{t.value}</td>
-							<td>--</td>
+						{#if t.creditValue === null}
+							<td
+								><input
+									on:change|once={() => {
+										if (!indexChanged.includes(t.id)) indexChanged.push(t.id);
+									}}
+									on:input={onlyNumbers}
+									bind:value={t.debitValue}
+									type="number"
+									class="px-2 focus:ring-2 focus:ring-[#00bcbc]"
+								/></td
+							>
+							<td />
 						{:else}
-							<td>--</td>
-							<td>{t.value}</td>
+							<td />
+							<td class="relative">
+								<input
+									on:change|once={() => {
+										if (!indexChanged.includes(t.id)) indexChanged.push(t.id);
+									}}
+									on:input={onlyNumbers}
+									bind:value={t.creditValue}
+									type="text"
+									class="px-2 focus:ring-2 focus:ring-[#00bcbc] text-center after:content-['€'] after:absolute after:right-0 after:top-1/2"
+								/>
+								<span class="absolute right-[5px] top-1/2 translate-y-[-50%]">€</span>
+							</td>
 						{/if}
 					</tr>
 				{/each}

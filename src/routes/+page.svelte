@@ -21,7 +21,7 @@
 		let transactionsChanged: TempTransaction[] = [];
 		for (let i = 0; i < indexChanged.length; i++) {
 			const index = indexChanged[i];
-			const transaction = transactions.find((t) => t.id === index);
+			const transaction = data.transactions.find((t) => t.id === index);
 			if (transaction !== undefined) {
 				transactionsChanged.push({
 					id: transaction.id,
@@ -41,7 +41,7 @@
 	function onlyNumbers(event: Event) {
 		if (event !== undefined && event.target !== null) {
 			if (event.target instanceof HTMLInputElement) {
-				event.target.value = event.target.value.replace(/[^0-9]/g, '');
+				event.target.value = event.target.value.replace(/[^0-9.]/g, '');
 			}
 		}
 	}
@@ -92,82 +92,80 @@
 					<tr>
 						<td>
 							<input
-								on:change|once={() => {
-									if (!indexChanged.includes(t.id)) indexChanged.push(t.id);
-								}}
 								bind:value={t.file}
+								on:change|once={() => {
+									if (!indexChanged.includes(t.id)) indexChanged.push(t.id);
+								}}
 								type="text"
 								class="px-2 focus:ring-2 focus:ring-[#00bcbc]"
 							/>
 						</td>
 						<td>
 							<input
-								on:change|once={() => {
-									if (!indexChanged.includes(t.id)) indexChanged.push(t.id);
-								}}
 								bind:value={t.matter}
+								on:change|once={() => {
+									if (!indexChanged.includes(t.id)) indexChanged.push(t.id);
+								}}
 								type="text"
 								class="px-2 focus:ring-2 focus:ring-[#00bcbc]"
 							/>
 						</td>
 						<td>
 							<input
+								bind:value={t.date}
 								on:change|once={() => {
 									if (!indexChanged.includes(t.id)) indexChanged.push(t.id);
 								}}
-								bind:value={t.date}
 								type="date"
 								class="px-2 focus:ring-2 focus:ring-[#00bcbc]"
 							/>
 						</td>
 						<td>
 							<input
+								bind:value={t.transactionMethod}
 								on:change|once={() => {
 									if (!indexChanged.includes(t.id)) indexChanged.push(t.id);
 								}}
-								bind:value={t.transactionMethod}
 								type="text"
 								class="px-2 focus:ring-2 focus:ring-[#00bcbc]"
 							/>
 						</td>
 						<td>
 							<input
+								bind:value={t.description}
 								on:change|once={() => {
 									if (!indexChanged.includes(t.id)) indexChanged.push(t.id);
 								}}
-								bind:value={t.description}
 								type="text"
 								class="px-2 focus:ring-2 focus:ring-[#00bcbc]"
 							/>
 						</td>
-						{#if t.creditValue === null}
-							<td
-								><input
-									on:change|once={() => {
-										if (!indexChanged.includes(t.id)) indexChanged.push(t.id);
-									}}
-									on:input={onlyNumbers}
-									bind:value={t.debitValue}
-									type="number"
-									class="px-2 focus:ring-2 focus:ring-[#00bcbc]"
-								/></td
-							>
-							<td />
-						{:else}
-							<td />
-							<td class="relative">
-								<input
-									on:change|once={() => {
-										if (!indexChanged.includes(t.id)) indexChanged.push(t.id);
-									}}
-									on:input={onlyNumbers}
-									bind:value={t.creditValue}
-									type="text"
-									class="px-2 focus:ring-2 focus:ring-[#00bcbc] text-center after:content-['€'] after:absolute after:right-0 after:top-1/2"
-								/>
-								<span class="absolute right-[5px] top-1/2 translate-y-[-50%]">€</span>
-							</td>
-						{/if}
+						<td class="relative">
+							<input
+								bind:value={t.debitValue}
+								on:change|once={() => {
+									if (!indexChanged.includes(t.id)) indexChanged.push(t.id);
+								}}
+								on:input={() => (t.creditValue = null)}
+								on:input={onlyNumbers}
+								type="text"
+								class="px-2 focus:ring-2 focus:ring-[#00bcbc]"
+							/>
+							<span class="absolute right-[5px] top-1/2 translate-y-[-50%]">€</span>
+						</td>
+						<td class="relative">
+							<input
+								bind:value={t.creditValue}
+								on:change|once={() => {
+									if (!indexChanged.includes(t.id)) indexChanged.push(t.id);
+								}}
+								on:input={() => (t.debitValue = null)}
+								on:input={onlyNumbers}
+								type="text"
+								class="px-2 focus:ring-2 focus:ring-[#00bcbc]"
+							/>
+							<span class="absolute right-[5px] top-1/2 translate-y-[-50%]">€</span>
+						</td>
 					</tr>
 				{/each}
 			</tbody>

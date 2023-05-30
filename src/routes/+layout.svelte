@@ -1,7 +1,6 @@
 <script>
 	import Nav from '$lib/components/Nav.svelte';
 	import '../app.css';
-	import 'iconify-icon';
 </script>
 
 <div class="body">

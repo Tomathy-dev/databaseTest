@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { PageServerData } from './$types';
+	import IoIosAdd from 'svelte-icons/io/IoIosAdd.svelte';
 
 	export let data: PageServerData;
 
@@ -7,15 +8,18 @@
 	 * Transaction type for creating object to be sent to server for update
 	 */
 	type TempTransaction = {
-		id: number;
-		file: number;
-		matter: number;
+		id: number | null;
+		file: number | null;
+		matter: number | null;
 		date: string;
 		transactionMethod: string;
 		description: string;
 		debitValue: number | null;
 		creditValue: number | null;
 	};
+
+	let newTransactions: TempTransaction[] = []; // Transactions that have been added
+	let indexChanged: number[] = []; // Indexes of transactions that have been changed
 
 	function createTransactionsChanged(): TempTransaction[] {
 		let transactionsChanged: TempTransaction[] = [];
@@ -46,12 +50,26 @@
 		}
 	}
 
-	let indexChanged: number[] = []; // Indexes of transactions that have been changed
+	function addTransaction() {
+		newTransactions = [
+			{
+				id: null,
+				file: null,
+				matter: null,
+				date: '',
+				transactionMethod: '',
+				description: '',
+				debitValue: null,
+				creditValue: null
+			},
+			...newTransactions
+		];
+	}
 
 	$: ({ transactions } = data);
 </script>
 
-<div class="grid grid-rows-[128px_1fr] grid-cols-1 overflow-auto">
+<div class="grid grid-rows-[100px_1fr] grid-cols-1 overflow-auto">
 	<div class="w-full border-b-[1px] border-slate-500 h-full flex items-center p-8 relative">
 		<h1 class="text-6xl font-bold">Ledger</h1>
 		<select class="ml-5 mt-2 border rounded-2xl text-slate-200 bg-transparent">
@@ -69,25 +87,86 @@
 			<form action="/search">
 				<input
 					type="text"
-					class="border-2 bg-transparent border-slate-500 rounded-2xl px-2 py-1 focus:ring-2 focus:ring-[#00bcbc] focus:border-transparent transition-all duration-100"
+					class="border-2 h-10 bg-transparent border-slate-500 rounded-2xl px-2 py-1 focus:ring-2 focus:ring-[#00bcbc] focus:border-transparent transition-all duration-100"
 					placeholder="Search file..."
 				/>
 			</form>
-			<img src="/add.svg" alt="Add icon" style="width: 40px" />
+			<div
+				class="w-10 h-10 hover:cursor-pointer hover:bg-slate-900 rounded-full ml-2 transition-all duration-100"
+				on:click={addTransaction}
+				on:keypress={addTransaction}
+			>
+				<IoIosAdd />
+			</div>
 		</div>
 		<table class="table table-compact mx-9 ">
 			<thead class="border-2 border-slate-500 sticky top-0">
 				<tr class="z-0">
-					<th class="p-2 w-20">File</th>
-					<th class="p-2 w-20">Matter</th>
-					<th class="p-2 w-24">Date</th>
-					<th class="p-2 w-24">Method</th>
-					<th class="p-2 w-7/12">Description</th>
-					<th class="p-2 w-24">Debit</th>
-					<th class="p-2 w-24">Credit</th>
+					<th class="p-2 w-[6%]">File</th>
+					<th class="p-2">Matter</th>
+					<th class="p-2">Date</th>
+					<th class="p-2 w-[8%]">Method</th>
+					<th class="p-2 w-[60%]">Description</th>
+					<th class="p-2 w-[8%]">Debit</th>
+					<th class="p-2 w-[8%]">Credit</th>
 				</tr>
 			</thead>
 			<tbody>
+				{#each newTransactions as t}
+					<tr>
+						<td>
+							<input
+								bind:value={t.file}
+								type="text"
+								class="px-2 focus:ring-2 focus:ring-[#00bcbc]"
+							/>
+						</td>
+						<td>
+							<input
+								bind:value={t.matter}
+								type="text"
+								class="px-2 focus:ring-2 focus:ring-[#00bcbc]"
+							/>
+						</td>
+						<td>
+							<input
+								bind:value={t.date}
+								type="text"
+								class="px-2 focus:ring-2 focus:ring-[#00bcbc]"
+							/>
+						</td>
+						<td>
+							<input
+								bind:value={t.transactionMethod}
+								type="text"
+								class="px-2 focus:ring-2 focus:ring-[#00bcbc]"
+							/>
+						</td>
+						<td>
+							<input
+								bind:value={t.description}
+								type="text"
+								class="px-2 focus:ring-2 focus:ring-[#00bcbc]"
+							/>
+						</td>
+						<td>
+							<input
+								bind:value={t.debitValue}
+								on:input={onlyNumbers}
+								type="text"
+								class="px-2 focus:ring-2 focus:ring-[#00bcbc]"
+							/>
+						</td>
+						<td>
+							<input
+								bind:value={t.creditValue}
+								on:input={onlyNumbers}
+								type="text"
+								class="px-2 focus:ring-2 focus:ring-[#00bcbc]"
+							/>
+						</td>
+					</tr>
+				{/each}
 				{#each transactions as t}
 					<tr>
 						<td>
@@ -151,7 +230,9 @@
 								type="text"
 								class="px-2 focus:ring-2 focus:ring-[#00bcbc]"
 							/>
-							<span class="absolute right-[5px] top-1/2 translate-y-[-50%]">€</span>
+							{#if t.debitValue !== null}
+								<span class="absolute right-[5px] top-1/2 translate-y-[-50%]">€</span>
+							{/if}
 						</td>
 						<td class="relative">
 							<input
@@ -164,7 +245,9 @@
 								type="text"
 								class="px-2 focus:ring-2 focus:ring-[#00bcbc]"
 							/>
-							<span class="absolute right-[5px] top-1/2 translate-y-[-50%]">€</span>
+							{#if t.creditValue !== null}
+								<span class="absolute right-[5px] top-1/2 translate-y-[-50%]">€</span>
+							{/if}
 						</td>
 					</tr>
 				{/each}

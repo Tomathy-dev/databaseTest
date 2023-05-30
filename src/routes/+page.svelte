@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { PageServerData } from './$types';
-	import IoIosAdd from 'svelte-icons/io/IoIosAdd.svelte';
+	import IoMdAdd from 'svelte-icons/io/IoMdAdd.svelte';
+	import IoIosSave from 'svelte-icons/io/IoIosSave.svelte';
 
 	export let data: PageServerData;
 
@@ -66,6 +67,22 @@
 		];
 	}
 
+	async function saveChanges() {
+		const transactionsChanged = createTransactionsChanged();
+		const obj = {
+			changed: transactionsChanged,
+			created: newTransactions
+		};
+		const response = await fetch('/api/transactions', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify(obj)
+		});
+		return response;
+	}
+
 	$: ({ transactions } = data);
 </script>
 
@@ -91,12 +108,21 @@
 					placeholder="Search file..."
 				/>
 			</form>
-			<div
-				class="w-10 h-10 hover:cursor-pointer hover:bg-slate-900 rounded-full ml-2 transition-all duration-100"
-				on:click={addTransaction}
-				on:keypress={addTransaction}
-			>
-				<IoIosAdd />
+			<div class="flex flex-row items-center">
+				<div
+					class="w-10 h-10 hover:cursor-pointer hover:bg-slate-900 rounded-full ml-2 transition-all duration-100"
+					on:click={addTransaction}
+					on:keypress={addTransaction}
+				>
+					<IoMdAdd />
+				</div>
+				<div
+					class="w-10 h-10 hover:cursor-pointer hover:bg-slate-900 rounded-full ml-2 transition-all duration-100 p-1"
+					on:click={saveChanges}
+					on:keypress={saveChanges}
+				>
+					<IoIosSave />
+				</div>
 			</div>
 		</div>
 		<table class="table table-compact mx-9 ">
@@ -131,7 +157,7 @@
 						<td>
 							<input
 								bind:value={t.date}
-								type="text"
+								type="date"
 								class="px-2 focus:ring-2 focus:ring-[#00bcbc]"
 							/>
 						</td>

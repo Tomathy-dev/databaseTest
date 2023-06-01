@@ -94,7 +94,9 @@
 			<option value="BPI" class="text-slate-950">BPI - **** **** **** 9876</option>
 			<option value="NB" class="text-slate-950">NB - **** **** **** 1029</option>
 		</select>
-		<button class="btn btn-accent ml-5 min-h-min h-10 mt-2">+ Add New Ledger</button>
+		<button class="btn bg-[#00bcbc] ml-5 min-h-min h-10 mt-2 text-white hover:bg-[#0aa4a4]"
+			>+ Add New Ledger</button
+		>
 		<div class="right-0 w-3/12 bg-slate-600 absolute h-full flex items-center justify-center">
 			<h1 class="text-7xl">10.000€</h1>
 		</div>
@@ -139,19 +141,19 @@
 			</thead>
 			<tbody>
 				{#each newTransactions as t}
-					<tr>
+					<tr class="hover:bg-slate-900/90">
 						<td>
 							<input
 								bind:value={t.file}
 								type="text"
-								class="px-2 focus:ring-2 focus:ring-[#00bcbc]"
+								class="px-2 focus:ring-2 focus:ring-[#00bcbc] text-center"
 							/>
 						</td>
 						<td>
 							<input
 								bind:value={t.matter}
 								type="text"
-								class="px-2 focus:ring-2 focus:ring-[#00bcbc]"
+								class="px-2 focus:ring-2 focus:ring-[#00bcbc] text-center"
 							/>
 						</td>
 						<td>
@@ -175,21 +177,29 @@
 								class="px-2 focus:ring-2 focus:ring-[#00bcbc]"
 							/>
 						</td>
-						<td>
+						<td class="relative">
 							<input
 								bind:value={t.debitValue}
+								on:input={() => (t.creditValue = null)}
 								on:input={onlyNumbers}
 								type="text"
-								class="px-2 focus:ring-2 focus:ring-[#00bcbc]"
+								class="px-2 focus:ring-2 focus:ring-[#00bcbc] text-right"
 							/>
+							{#if t.debitValue !== null}
+								<span class="absolute left-[5px] top-1/2 translate-y-[-50%]">€</span>
+							{/if}
 						</td>
-						<td>
+						<td class="relative">
 							<input
 								bind:value={t.creditValue}
+								on:input={() => (t.debitValue = null)}
 								on:input={onlyNumbers}
 								type="text"
-								class="px-2 focus:ring-2 focus:ring-[#00bcbc]"
+								class="px-2 focus:ring-2 focus:ring-[#00bcbc] text-right"
 							/>
+							{#if t.creditValue !== null}
+								<span class="absolute left-[5px] top-1/2 translate-y-[-50%]">€</span>
+							{/if}
 						</td>
 					</tr>
 				{/each}
@@ -202,7 +212,7 @@
 									if (!indexChanged.includes(t.id)) indexChanged.push(t.id);
 								}}
 								type="text"
-								class="px-2 focus:ring-2 focus:ring-[#00bcbc]"
+								class="px-2 focus:ring-2 focus:ring-[#00bcbc] text-center"
 							/>
 						</td>
 						<td>
@@ -212,7 +222,7 @@
 									if (!indexChanged.includes(t.id)) indexChanged.push(t.id);
 								}}
 								type="text"
-								class="px-2 focus:ring-2 focus:ring-[#00bcbc]"
+								class="px-2 focus:ring-2 focus:ring-[#00bcbc] text-center"
 							/>
 						</td>
 						<td>
@@ -254,10 +264,10 @@
 								on:input={() => (t.creditValue = null)}
 								on:input={onlyNumbers}
 								type="text"
-								class="px-2 focus:ring-2 focus:ring-[#00bcbc]"
+								class="px-2 focus:ring-2 focus:ring-[#00bcbc] text-right"
 							/>
 							{#if t.debitValue !== null}
-								<span class="absolute right-[5px] top-1/2 translate-y-[-50%]">€</span>
+								<span class="absolute left-[5px] top-1/2 translate-y-[-50%]">€</span>
 							{/if}
 						</td>
 						<td class="relative">
@@ -269,10 +279,10 @@
 								on:input={() => (t.debitValue = null)}
 								on:input={onlyNumbers}
 								type="text"
-								class="px-2 focus:ring-2 focus:ring-[#00bcbc]"
+								class="px-2 focus:ring-2 focus:ring-[#00bcbc] text-right"
 							/>
 							{#if t.creditValue !== null}
-								<span class="absolute right-[5px] top-1/2 translate-y-[-50%]">€</span>
+								<span class="absolute left-[5px] top-1/2 translate-y-[-50%]">€</span>
 							{/if}
 						</td>
 					</tr>
@@ -288,9 +298,7 @@
 	}
 	td {
 		font-size: 1rem;
-		border-left: 1px solid rgb(100, 116, 139);
-		border-right: 1px solid rgb(100, 116, 139);
-		border-bottom: 1px solid rgb(100, 116, 139);
+		border: 1px solid rgb(100, 116, 139);
 		padding: 0;
 	}
 	table input {
@@ -298,5 +306,15 @@
 		height: 100%;
 		border: none;
 		background-color: transparent;
+		cursor: pointer;
+	}
+
+	table input:focus {
+		cursor: text;
+	}
+
+	tr:hover td,
+	tr:focus-within td {
+		background-color: rgba(0, 0, 0, 0.1);
 	}
 </style>

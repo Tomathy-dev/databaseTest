@@ -3,18 +3,6 @@ import type { RequestEvent } from './$types';
 
 export async function POST(event: RequestEvent) {
 	const data = await event.request.json();
-	if (data.created.length !== 0) {
-		data.created.forEach((element: any) => {
-			if (element.debitValue !== null) element.debitValue = parseFloat(element.debitValue);
-			if (element.creditValue !== null) element.creditValue = parseFloat(element.creditValue);
-		});
-	}
-	if (data.changed.length !== 0) {
-		data.changed.forEach((element: any) => {
-			if (element.debitValue !== null) element.debitValue = parseFloat(element.debitValue);
-			if (element.creditValue !== null) element.creditValue = parseFloat(element.creditValue);
-		});
-	}
 	const createArray = [];
 	for (let i = 0; i < data.created.length; i++) {
 		createArray.push(
@@ -69,8 +57,8 @@ export async function POST(event: RequestEvent) {
 			})
 		);
 	}
-	if (updateArray.length === 0) await prisma.$transaction([...createArray]);
-	else if (createArray.length === 0) await prisma.$transaction([...updateArray]);
+	if (updateArray.length === 0) await prisma.$transaction(createArray);
+	else if (createArray.length === 0) await prisma.$transaction(updateArray);
 	else await prisma.$transaction([...createArray, ...updateArray]);
 	return new Response('hello there');
 }

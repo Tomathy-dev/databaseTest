@@ -1,82 +1,30 @@
-<script>
+<script lang="ts">
 	import { page } from '$app/stores';
-
-	$: routeId = $page.route.id;
+	import { AppRail, AppRailAnchor } from '@skeletonlabs/skeleton';
+	import Icon from '@iconify/svelte';
 </script>
 
-<div class="wrapper">
-	<div class="logo">
-		<img alt="Database Icon" src="/database-icon.svg" width="55px" height="55px" />
+<nav
+	class="h-full border-r border-surface-100-800-token flex items-center flex-col p-0 {$$props.class}"
+>
+	<div class="p-2 border-b-2 border-surface-100-800-token">
+		<Icon icon="material-symbols:database" class="text-7xl" />
 	</div>
-	<nav>
-		<ul class="mainNav">
-			<a href="/"
-				><li class:active={routeId === '/'}>
-					<img alt="Financial Accounts" src="/money-icon.svg" />
-				</li></a
-			>
-			<a href="/"><li><img alt="File Database" src="/file-icon.svg" /></li></a>
-			<a href="/"><li><img alt="Lawyer Corner" src="/briefcase-icon.svg" /></li></a>
-		</ul>
-	</nav>
-</div>
+	<AppRail background="bg-transparent" width="w-full" active="bg-primary-active-token">
+		<AppRailAnchor href="/ledger" selected={$page.url.pathname.split('/')[1] === 'ledger'}>
+			<svelte:fragment slot="lead">
+				<Icon icon="material-symbols:menu-book" class="text-3xl" />
+			</svelte:fragment>
+			<span class="text-base">Ledgers</span>
+		</AppRailAnchor>
+		<AppRailAnchor href="/" selected={$page.url.pathname === '/'}>
+			<svelte:fragment slot="lead">
+				<Icon icon="material-symbols:construction" class="text-3xl" />
+			</svelte:fragment>
+			<span class="text-base">To do</span>
+		</AppRailAnchor>
+	</AppRail>
+</nav>
 
 <style>
-	.wrapper {
-		height: 100vh;
-		background-color: #00bcbc;
-		display: inline-block;
-	}
-
-	.logo {
-		width: 75px;
-		height: 75px;
-		box-sizing: border-box;
-		padding: 10px;
-		position: relative;
-	}
-
-	.logo::before {
-		content: '';
-		position: absolute;
-		bottom: 0;
-		left: 5px;
-		width: 65px;
-		height: 2px;
-		background-color: #04d5ce;
-	}
-
-	ul {
-		list-style: none;
-		padding: 0;
-		margin-top: 20px;
-		display: flex;
-		flex-direction: column;
-		row-gap: 5px;
-		justify-content: center;
-		align-items: center;
-	}
-
-	.mainNav img {
-		width: 30px;
-	}
-
-	.mainNav li {
-		width: 60px;
-		height: 60px;
-		border-radius: 50%;
-		display: flex;
-		justify-content: center;
-		align-items: center;
-		transition: all 300ms ease-in;
-	}
-
-	.mainNav li:hover {
-		background-color: #007a7a;
-		border-radius: 5px;
-	}
-	.active {
-		background-color: #007a7a;
-		border-radius: 5px !important;
-	}
 </style>

@@ -4,8 +4,10 @@ import { faker } from '@faker-js/faker';
 const prisma = new PrismaClient();
 
 const users: Prisma.FileCreateInput[] = [];
+const trans: Prisma.TransactionCreateInput[] = [];
 
 let gamer: Prisma.FileCreateInput;
+let transac: Prisma.TransactionCreateInput;
 
 async function main() {
 	for (let i = 0; i < 100; i++) {
@@ -63,6 +65,43 @@ async function main() {
 				connect: { cardNumber: '1234567890123456' }
 			},
 			transactionMethod: 'CASH'
+		}
+	});
+
+	for (let i = 0; i < 100000; i++) {
+		transac = {
+			matterRelation: {
+				connect: {
+					fileId_matter: {
+						fileId: 1,
+						matter: 1
+					}
+				}
+			},
+			date: '2023-05-25',
+			description: 'Teste',
+			creditValue: 1000,
+			Ledger: {
+				connect: { cardNumber: '1234567890123456' }
+			},
+			transactionMethod: 'CASH'
+		};
+		trans.push(transac);
+	}
+
+	for (const u of trans) {
+		const t = await prisma.transaction.create({
+			data: u
+		});
+		console.log(t);
+	}
+
+	await prisma.ledger.update({
+		where: {
+			cardNumber: '1234567890123456'
+		},
+		data: {
+			totalValue: -1000
 		}
 	});
 }

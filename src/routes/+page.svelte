@@ -32,18 +32,19 @@
 	}
 
 	function addTransaction() {
-		newTransactions = [
+		transactions = [
 			{
-				id: null,
-				file: null,
-				matter: null,
+				id: NaN,
+				file: NaN,
+				matter: NaN,
 				date: '',
 				transactionMethod: '',
 				description: '',
 				debitValue: null,
-				creditValue: null
+				creditValue: null,
+				bank: ''
 			},
-			...newTransactions
+			...transactions
 		];
 	}
 
@@ -122,7 +123,7 @@
 				>
 			</button>
 		</div>
-		<table class="table table-compact mx-9 ">
+		<table class="table table-compact mx-9">
 			<thead class="border-2 border-slate-500 sticky top-0">
 				<tr>
 					<th class="p-2 w-20">
@@ -331,15 +332,5 @@
 	tr:hover td,
 	tr:focus-within td {
 		background-color: rgba(0, 0, 0, 0.1);
-	}
-
-	input::-webkit-outer-spin-button,
-	input::-webkit-inner-spin-button {
-		-webkit-appearance: none;
-		margin: 0;
-	}
-
-	input[type='number'] {
-		-moz-appearance: textfield;
 	}
 </style>

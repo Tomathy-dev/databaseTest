@@ -1,6 +1,6 @@
 <script>
 	import Nav from '$lib/components/Nav.svelte';
-	import Icon from '@iconify/svelte';
+
 	// Your selected Skeleton theme:
 	import '../theme.postcss';
 
@@ -43,5 +43,15 @@
 	:global(::-webkit-scrollbar-thumb) {
 		background: rgba(153, 153, 153, 0.474);
 		border-radius: 9999px;
+	}
+
+	:global(input::-webkit-outer-spin-button, input::-webkit-inner-spin-button) {
+		-webkit-appearance: none;
+		margin: 0;
+	}
+
+	:global(input[type='number']) {
+		appearance: textfield;
+		-moz-appearance: textfield;
 	}
 </style>

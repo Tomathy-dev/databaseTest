@@ -9,10 +9,17 @@ const trans: Prisma.TransactionCreateInput[] = [];
 let gamer: Prisma.FileCreateInput;
 let transac: Prisma.TransactionCreateInput;
 
+function dateToString(date: Date) {
+	const year = date.getFullYear();
+	const month = String(date.getMonth() + 1).padStart(2, '0');
+	const day = String(date.getDate()).padStart(2, '0');
+	return `${year}-${month}-${day}`;
+}
+
 async function main() {
-	for (let i = 0; i < 100; i++) {
+	for (let i = 0; i < 1000; i++) {
 		gamer = {
-			name: faker.name.fullName(),
+			name: faker.person.fullName(),
 			email: faker.internet.email(),
 			personal: Math.random() < 0.5,
 			matters: {
@@ -20,12 +27,12 @@ async function main() {
 					{
 						matter: 1,
 						department: faker.commerce.department(),
-						inCharge: faker.name.firstName()
+						inCharge: faker.person.firstName()
 					},
 					{
 						matter: 2,
 						department: faker.commerce.department(),
-						inCharge: faker.name.firstName()
+						inCharge: faker.person.firstName()
 					}
 				]
 			}
@@ -40,51 +47,63 @@ async function main() {
 		console.log(file);
 	}
 
-	await prisma.ledger.create({
-		data: {
+	const addedLedgers: Prisma.LedgerCreateInput[] = [
+		{
 			cardNumber: '1234567890123456',
-			name: 'Caixa Geral de depósitos',
+			name: 'Caixa Geral de Depósitos',
+			totalValue: 1000000
+		},
+		{
+			cardNumber: '1234567890123457',
+			name: 'Novo Banco',
 			totalValue: 1000000
 		}
-	});
+	];
+	await Promise.all(
+		addedLedgers.map(async (ledger) => {
+			await prisma.ledger.create({
+				data: ledger
+			});
+		})
+	);
 
 	await prisma.transaction.create({
 		data: {
 			matterRelation: {
 				connect: {
 					fileId_matter: {
-						fileId: 1,
-						matter: 1
+						fileId: faker.number.int({ min: 1, max: 1000 }),
+						matter: faker.number.int({ min: 1, max: 2 })
 					}
 				}
 			},
-			date: '2023-05-25',
-			description: 'Teste',
-			creditValue: 1000,
+			date: dateToString(faker.date.anytime()),
+			description: faker.finance.transactionDescription(),
+			creditValue: 2000,
 			Ledger: {
 				connect: { cardNumber: '1234567890123456' }
 			},
-			transactionMethod: 'CASH'
+			transactionMethod: faker.finance.transactionType()
 		}
 	});
 
-	for (let i = 0; i < 100000; i++) {
+	for (let i = 0; i < 500; i++) {
 		transac = {
 			matterRelation: {
 				connect: {
 					fileId_matter: {
-						fileId: 1,
-						matter: 1
+						fileId: faker.number.int({ min: 1, max: 1000 }),
+						matter: faker.number.int({ min: 1, max: 2 })
 					}
 				}
 			},
-			date: '2023-05-25',
-			description: 'Teste',
-			creditValue: 1000,
+			date: dateToString(faker.date.anytime()),
+			description: faker.finance.transactionDescription(),
+			creditValue: 2000,
 			Ledger: {
 				connect: { cardNumber: '1234567890123456' }
 			},
-			transactionMethod: 'CASH'
+			transactionMethod: faker.finance.transactionType()
 		};
 		trans.push(transac);
 	}
@@ -96,14 +115,33 @@ async function main() {
 		console.log(t);
 	}
 
-	await prisma.ledger.update({
-		where: {
-			cardNumber: '1234567890123456'
-		},
-		data: {
-			totalValue: -1000
-		}
-	});
+	for (let i = 0; i < 500; i++) {
+		transac = {
+			matterRelation: {
+				connect: {
+					fileId_matter: {
+						fileId: faker.number.int({ min: 1, max: 1000 }),
+						matter: faker.number.int({ min: 1, max: 2 })
+					}
+				}
+			},
+			date: dateToString(faker.date.anytime()),
+			description: faker.finance.transactionDescription(),
+			creditValue: 2000,
+			Ledger: {
+				connect: { cardNumber: '1234567890123457' }
+			},
+			transactionMethod: faker.finance.transactionType()
+		};
+		trans.push(transac);
+	}
+
+	for (const u of trans) {
+		const t = await prisma.transaction.create({
+			data: u
+		});
+		console.log(t);
+	}
 }
 
 main()

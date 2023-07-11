@@ -8,6 +8,7 @@ const trans: Prisma.TransactionCreateInput[] = [];
 
 let gamer: Prisma.FileCreateInput;
 let transac: Prisma.TransactionCreateInput;
+const options = ['red', 'yellow', 'green'];
 
 function dateToString(date: Date) {
 	const year = date.getFullYear();
@@ -88,6 +89,11 @@ async function main() {
 	});
 
 	for (let i = 0; i < 500; i++) {
+		const random = faker.number.int({ min: 0, max: 100 });
+		let color = '';
+		if (random > 90) {
+			color = options[Math.floor(Math.random() * options.length)];
+		}
 		transac = {
 			matterRelation: {
 				connect: {
@@ -103,7 +109,8 @@ async function main() {
 			Ledger: {
 				connect: { cardNumber: '1234567890123456' }
 			},
-			transactionMethod: faker.finance.transactionType()
+			transactionMethod: faker.finance.transactionType(),
+			color: color
 		};
 		trans.push(transac);
 	}

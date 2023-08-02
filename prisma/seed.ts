@@ -8,13 +8,13 @@ const trans: Prisma.TransactionCreateInput[] = [];
 
 let gamer: Prisma.FileCreateInput;
 let transac: Prisma.TransactionCreateInput;
-const options = ['red', 'yellow', 'green'];
+const options = ['primary', 'secondary', 'tertiary', 'success', 'warning', 'error'];
 
 function dateToString(date: Date) {
 	const year = date.getFullYear();
 	const month = String(date.getMonth() + 1).padStart(2, '0');
 	const day = String(date.getDate()).padStart(2, '0');
-	return `${year}-${month}-${day}`;
+	return `${day}-${month}-${year}`;
 }
 
 async function main() {
@@ -91,7 +91,7 @@ async function main() {
 	for (let i = 0; i < 500; i++) {
 		const random = faker.number.int({ min: 0, max: 100 });
 		let color = '';
-		if (random > 90) {
+		if (random > 60) {
 			color = options[Math.floor(Math.random() * options.length)];
 		}
 		transac = {
@@ -121,6 +121,8 @@ async function main() {
 		});
 		console.log(t);
 	}
+
+	trans.length = 0;
 
 	for (let i = 0; i < 500; i++) {
 		transac = {

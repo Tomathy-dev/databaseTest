@@ -9,10 +9,11 @@
 
 	// Finally, your application's global stylesheet (sometimes labeled 'app.css')
 	import '../app.postcss';
-	import { AppShell, Modal } from '@skeletonlabs/skeleton';
+	import { AppShell, Drawer, Modal } from '@skeletonlabs/skeleton';
 </script>
 
 <Modal />
+<Drawer />
 
 <AppShell>
 	<svelte:fragment slot="sidebarLeft">

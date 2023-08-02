@@ -1,10 +1,26 @@
 import { prisma } from '$lib/server/prisma';
-import { error, type Actions } from '@sveltejs/kit';
-import type { PageServerLoad } from './$types';
+import { error } from '@sveltejs/kit';
+import type { PageServerLoad, RequestEvent, Actions } from './$types';
 
 export const actions: Actions = {
-	default: async () => {
-		console.log('formData received');
+	colorChange: async (event: RequestEvent) => {
+		const data = await event.request.formData();
+		const color = data.get('color');
+		const selected = data.get('selected'); // "selected" is a string of comma seperated transaction id's (if there's more than one)
+		if (!color || !selected) {
+			return;
+		}
+		const ids = selected.toString().split(',');
+		await prisma.transaction.updateMany({
+			where: {
+				id: {
+					in: ids.map((id) => parseInt(id))
+				}
+			},
+			data: {
+				color: color.toString()
+			}
+		});
 	}
 } satisfies Actions;
 

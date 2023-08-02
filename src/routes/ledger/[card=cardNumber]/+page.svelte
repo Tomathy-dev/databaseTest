@@ -1,28 +1,52 @@
 <script lang="ts">
 	import { page } from '$app/stores';
 	import Icon from '@iconify/svelte';
+	import { onDestroy } from 'svelte';
 	import { scale } from 'svelte/transition';
 
 	export let data;
 	let selected: Number[] = [];
 	let allselected = false;
-	const options = ['variant-filled-success', 'variant-filled-warning', 'variant-filled-error'];
+	let color_picked = 'noColor';
 
-	const heading = ['File', 'Matter', 'Date', 'Method', 'Description', 'Debit', 'Credit'];
+	const heading = ['File-Matter', 'Date', 'Method', 'Description', 'Debit', 'Credit'];
 
 	function selectAll() {
 		if (allselected) {
 			selected = [];
 			allselected = false;
 		} else {
-			selected = ledger.map((item) => item.id);
+			selected = ledger.map((item: any) => item.id);
 			allselected = true;
 		}
+	}
+
+	function changeColor(color: string) {
+		selected.forEach((id: Number) => {
+			const obj = data.ledger.find((item: any) => item.id === id);
+			if (obj) {
+				obj.color = color;
+				data = data;
+			}
+		});
+	}
+
+	async function sendData(e: BeforeUnloadEvent) {
+		const response = await fetch('../transaction', {
+			method: 'PUT',
+			body: JSON.stringify(data),
+			headers: {
+				'Content-Type': 'application/json'
+			}
+		});
+		return response;
 	}
 
 	$: ledger = data.ledger;
 	$: bank = data.bank;
 </script>
+
+<svelte:window on:beforeunload|preventDefault={sendData} />
 
 <div class="p-5 flex flex-col relative translate-x-0">
 	<div class="flex flex-row gap-8 items-center">
@@ -45,7 +69,7 @@
 		</div>
 	</div>
 	<div
-		class="bg-surface-200-700-token px-2 py-2 sticky top-0 grid grid-cols-[1fr_auto] mt-6 rounded-t-md"
+		class="bg-surface-200-700-token px-2 py-2 sticky top-0 grid grid-cols-[1fr_auto] mt-6 rounded-t-md mb-[-5px]"
 	>
 		<!-- Permanent Buttons -->
 		<div class="flex gap-2">
@@ -62,13 +86,62 @@
 		<div class="flex gap-2">
 			<!-- Selected Buttons and Search Bar -->
 			{#if selected.length > 0}
-				<button
-					type="button"
-					class="btn-icon hover:variant-filled-surface"
-					transition:scale={{ duration: 200, start: 0 }}
-				>
-					<Icon icon="material-symbols:border-color" class="text-3xl" />
-				</button>
+				<div class="relative">
+					<button
+						type="button"
+						class="btn-icon hover:variant-filled-surface relative"
+						transition:scale={{ duration: 200, start: 0 }}
+					>
+						<Icon icon="material-symbols:border-color" class="text-3xl" />
+					</button>
+					<span
+						class="absolute w-5 h-5 bg-surface-900 rotate-45 left-[50%] translate-x-[-50%] bottom-[-50%]"
+					/>
+					<div
+						class="absolute left-[50%] top-[120%] bg-surface-900 rounded-[4px] p-4 translate-x-[-50%] flex flex-row gap-4"
+					>
+						<button on:click={() => changeColor('primary')}>
+							<svg width="30" height="30" xmlns="http://www.w3.org/2000/svg" class="cursor-pointer">
+								<circle cx="15" cy="15" r="15" fill="#008585" />
+								<!-- primary -->
+							</svg>
+						</button>
+						<button on:click={() => changeColor('secondary')}>
+							<svg width="30" height="30" xmlns="http://www.w3.org/2000/svg" class="cursor-pointer">
+								<circle cx="15" cy="15" r="15" fill="#4f46e5" />
+								<!-- secondary -->
+							</svg>
+						</button>
+						<button on:click={() => changeColor('tertiary')}>
+							<svg width="30" height="30" xmlns="http://www.w3.org/2000/svg" class="cursor-pointer">
+								<circle cx="15" cy="15" r="15" fill="#0ea5e9" />
+								<!-- tertiary -->
+							</svg>
+						</button>
+						<button on:click={() => changeColor('success')}>
+							<svg width="30" height="30" xmlns="http://www.w3.org/2000/svg" class="cursor-pointer">
+								<circle cx="15" cy="15" r="15" fill="#21c700" />
+								<!-- success -->
+							</svg>
+						</button>
+						<button on:click={() => changeColor('warning')}>
+							<svg width="30" height="30" xmlns="http://www.w3.org/2000/svg" class="cursor-pointer">
+								<circle cx="15" cy="15" r="15" fill="#eab308" />
+								<!-- warning -->
+							</svg>
+						</button>
+						<button on:click={() => changeColor('error')}>
+							<svg width="30" height="30" xmlns="http://www.w3.org/2000/svg" class="cursor-pointer">
+								<circle cx="15" cy="15" r="15" fill="#d41976" />
+								<!-- error -->
+							</svg>
+						</button>
+						<button on:click={() => changeColor('noColor')}>
+							<Icon icon="material-symbols:block" class="text-[30px] cursor-pointer" />
+							<!-- noColor -->
+						</button>
+					</div>
+				</div>
 				<button
 					type="button"
 					class="btn-icon hover:variant-filled-surface"
@@ -89,13 +162,13 @@
 		</div>
 	</div>
 	<div class="table-container">
-		<table class="table table-interactive rounded-b-lg overflow-x-auto">
+		<table class="table table-hover rounded-b-lg overflow-x-auto table-auto">
 			<thead class="table-head">
 				<tr>
 					<th class="text-center"
 						><input
 							type="checkbox"
-							class="checkbox w-6 h-6"
+							class="checkbox w-6 h-6 bg-surface-50-900-token"
 							on:click={selectAll}
 							on:keydown={selectAll}
 						/></th
@@ -107,12 +180,11 @@
 			</thead>
 			<tbody class="table-body">
 				{#each ledger as l}
-					<tr id="variant-filled-success">
+					<tr id={l.color} class="hover:cursor-pointer">
 						<td class="text-center"
 							><input type="checkbox" class="checkbox" bind:group={selected} value={l.id} /></td
 						>
-						<td>{l.file}</td>
-						<td>{l.matter}</td>
+						<td>{l.file} - {l.matter}</td>
 						<td>{l.date}</td>
 						<td>{l.transactionMethod}</td>
 						<td>{l.description}</td>
@@ -136,3 +208,29 @@
 		</table>
 	</div>
 </div>
+
+<style>
+	#primary {
+		background-color: rgb(var(--color-primary-500) / 0.5) !important;
+	}
+
+	#secondary {
+		background-color: rgb(var(--color-secondary-500) / 0.5) !important;
+	}
+
+	#tertiary {
+		background-color: rgb(var(--color-tertiary-500) / 0.5) !important;
+	}
+
+	#success {
+		background-color: rgb(var(--color-success-500) / 0.5) !important;
+	}
+
+	#warning {
+		background-color: rgb(var(--color-warning-500) / 0.5) !important;
+	}
+
+	#error {
+		background-color: rgb(var(--color-error-500) / 0.5) !important;
+	}
+</style>

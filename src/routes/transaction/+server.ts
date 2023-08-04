@@ -5,16 +5,29 @@ export async function PUT({ request }: RequestEvent) {
 	if (data == null) {
 		return json({ status: 400 });
 	}
-	await prisma.transaction.updateMany({
-		where: {
-			id: {
-				in: data.map((obj: any) => parseInt(obj.id))
+
+	try {
+		await prisma.$transaction(async (tx) => {
+			for (let i = 0; i < data.length; i++) {
+				const transaction = await tx.transaction.update({
+					where: {
+						id: data[i].id
+					},
+					data: {
+						file: data[i].file,
+						matter: data[i].matter,
+						date: data[i].date,
+						description: data[i].description,
+						value: data[i].value,
+						transactionMethod: data[i].transactionMethod,
+						color: data[i].color
+					}
+				});
 			}
-		},
-		data: {
-			...data
-		}
-	});
+		});
+	} catch (error) {
+		console.log(error);
+	}
 
 	return json({ status: 204 });
 }

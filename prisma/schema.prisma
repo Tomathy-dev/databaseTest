@@ -6,8 +6,8 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = "file:./dev.sqlite"
+  provider = "mysql"
+  url      = env("DATABASE_URL")
 }
 
 model File {
@@ -36,11 +36,10 @@ model Transaction {
   matterRelation    Matter  @relation(fields: [file, matter], references: [fileId, matter])
   file              Int
   matter            Int
-  date              String
+  date              DateTime
   transactionMethod String
   description       String
-  creditValue       Float?
-  debitValue        Float?
+  value             Float
   Ledger            Ledger  @relation(fields: [bank], references: [name])
   bank              String
   color             String?

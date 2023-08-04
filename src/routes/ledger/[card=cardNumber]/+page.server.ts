@@ -1,27 +1,48 @@
 import { prisma } from '$lib/server/prisma';
-import { error } from '@sveltejs/kit';
+import { error, fail } from '@sveltejs/kit';
 import type { PageServerLoad, RequestEvent, Actions } from './$types';
 
 export const actions: Actions = {
-	colorChange: async (event: RequestEvent) => {
-		const data = await event.request.formData();
-		const color = data.get('color');
-		const selected = data.get('selected'); // "selected" is a string of comma seperated transaction id's (if there's more than one)
-		if (!color || !selected) {
-			return;
+	addTransaction: async ({ request }: RequestEvent) => {
+		const data = await request.formData();
+		const fileMatter = data.get('file');
+		const date = data.get('date')?.toString();
+		const description = data.get('description')?.toString();
+		const method = data.get('method')?.toString();
+		let value = parseFloat(data.get('value')?.toString() || '0');
+		const exchange = data.get('exchange')?.toString();
+		const bank = data.get('bank')?.toString();
+		let matter = 0;
+		let file = 0;
+		if(!fileMatter || !date || !description || !method || !exchange) {
+			return fail(400, { message: 'Missing required fields' });
 		}
-		const ids = selected.toString().split(',');
-		await prisma.transaction.updateMany({
-			where: {
-				id: {
-					in: ids.map((id) => parseInt(id))
+		const temp = fileMatter?.toString().split('-');
+		file = parseInt(temp[0]);
+		if(temp.length === 2){
+			matter = parseInt(temp[1]);
+		}
+		if(exchange.toString() === 'Debit') {
+			value *= -1;
+		}
+		
+		console.log(file, matter, date, description, value, method, bank);
+		try{
+			await prisma.transaction.create({
+				data: {
+					file: file,
+					matter: matter,
+					date: new Date(date),
+					description: description,
+					value: value,
+					transactionMethod: method,
+					bank: bank
 				}
-			},
-			data: {
-				color: color.toString()
-			}
-		});
-	}
+			});
+		} catch (e){
+			return fail(400, { message: 'Invalid data' })
+		}
+	},
 } satisfies Actions;
 
 export const load = (async ({ params }) => {

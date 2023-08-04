@@ -10,13 +10,6 @@ let gamer: Prisma.FileCreateInput;
 let transac: Prisma.TransactionCreateInput;
 const options = ['primary', 'secondary', 'tertiary', 'success', 'warning', 'error'];
 
-function dateToString(date: Date) {
-	const year = date.getFullYear();
-	const month = String(date.getMonth() + 1).padStart(2, '0');
-	const day = String(date.getDate()).padStart(2, '0');
-	return `${day}-${month}-${year}`;
-}
-
 async function main() {
 	for (let i = 0; i < 1000; i++) {
 		gamer = {
@@ -78,9 +71,9 @@ async function main() {
 					}
 				}
 			},
-			date: dateToString(faker.date.anytime()),
+			date: faker.date.between({from: '2017-01-01T00:00:00.000Z', to: "2023-07-31T00:00:00.000Z"}),
 			description: faker.finance.transactionDescription(),
-			creditValue: 2000,
+			value: 2000,
 			Ledger: {
 				connect: { cardNumber: '1234567890123456' }
 			},
@@ -103,9 +96,9 @@ async function main() {
 					}
 				}
 			},
-			date: dateToString(faker.date.anytime()),
+			date: faker.date.between({from: '2017-01-01T00:00:00.000Z', to: "2023-07-31T00:00:00.000Z"}),
 			description: faker.finance.transactionDescription(),
-			creditValue: 2000,
+			value: 2000,
 			Ledger: {
 				connect: { cardNumber: '1234567890123456' }
 			},
@@ -134,9 +127,9 @@ async function main() {
 					}
 				}
 			},
-			date: dateToString(faker.date.anytime()),
+			date: faker.date.between({from: '2017-01-01T00:00:00.000Z', to: "2023-07-31T00:00:00.000Z"}),
 			description: faker.finance.transactionDescription(),
-			creditValue: 2000,
+			value: 2000,
 			Ledger: {
 				connect: { cardNumber: '1234567890123457' }
 			},

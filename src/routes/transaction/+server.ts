@@ -1,15 +1,15 @@
-import { json, type RequestEvent } from '@sveltejs/kit';
+import { fail, json, type RequestEvent } from '@sveltejs/kit';
 
 export async function PUT({ request }: RequestEvent) {
 	const data = await request.json();
 	if (data == null) {
-		return json({ status: 400 });
+		return new Response(null, { status: 400 });
 	}
 
 	try {
 		await prisma.$transaction(async (tx) => {
 			for (let i = 0; i < data.length; i++) {
-				const transaction = await tx.transaction.update({
+				await tx.transaction.update({
 					where: {
 						id: data[i].id
 					},
@@ -27,7 +27,47 @@ export async function PUT({ request }: RequestEvent) {
 		});
 	} catch (error) {
 		console.log(error);
+		return fail(500, { message: 'Internal server error' });
 	}
 
-	return json({ status: 204 });
+	return new Response(null, { status: 204 });
+}
+
+export async function DELETE({request}: RequestEvent) {
+	const data = await request.json();
+	if (data == null) {
+		return json({ status: 400 });
+	}
+
+	try {
+		await prisma.$transaction(async (tx) => {
+			for (let i = 0; i < data.length; i++) {
+				const temp = await tx.transaction.findUnique({
+					where: {
+						id: data[i]
+					}
+				});
+				await tx.ledger.update({
+					where: {
+						name: temp?.bank
+					},
+					data: {
+						totalValue: {
+							decrement: temp?.value
+						}
+					}
+				})
+				await tx.transaction.delete({
+					where: {
+						id: data[i]
+					}
+				});
+			}
+		});
+	} catch (error) {
+		console.log(error);
+		return fail(500, { message: 'Internal server error' }); 
+	}
+
+	return new Response(null, { status: 204 });
 }

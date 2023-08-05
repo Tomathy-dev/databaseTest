@@ -45,12 +45,12 @@ async function main() {
 		{
 			cardNumber: '1234567890123456',
 			name: 'Caixa Geral de Depósitos',
-			totalValue: 1000000
+			totalValue: 0
 		},
 		{
 			cardNumber: '1234567890123457',
 			name: 'Novo Banco',
-			totalValue: 1000000
+			totalValue: 0
 		}
 	];
 	await Promise.all(
@@ -60,26 +60,6 @@ async function main() {
 			});
 		})
 	);
-
-	await prisma.transaction.create({
-		data: {
-			matterRelation: {
-				connect: {
-					fileId_matter: {
-						fileId: faker.number.int({ min: 1, max: 1000 }),
-						matter: faker.number.int({ min: 1, max: 2 })
-					}
-				}
-			},
-			date: faker.date.between({from: '2017-01-01T00:00:00.000Z', to: "2023-07-31T00:00:00.000Z"}),
-			description: faker.finance.transactionDescription(),
-			value: 2000,
-			Ledger: {
-				connect: { cardNumber: '1234567890123456' }
-			},
-			transactionMethod: faker.finance.transactionType()
-		}
-	});
 
 	for (let i = 0; i < 500; i++) {
 		const random = faker.number.int({ min: 0, max: 100 });
@@ -98,7 +78,7 @@ async function main() {
 			},
 			date: faker.date.between({from: '2017-01-01T00:00:00.000Z', to: "2023-07-31T00:00:00.000Z"}),
 			description: faker.finance.transactionDescription(),
-			value: 2000,
+			value: faker.number.float({ min: -100000, max: 100000, precision: 0.01 }),
 			Ledger: {
 				connect: { cardNumber: '1234567890123456' }
 			},
@@ -109,9 +89,23 @@ async function main() {
 	}
 
 	for (const u of trans) {
-		const t = await prisma.transaction.create({
-			data: u
-		});
+		const t = await prisma.$transaction(
+			[
+				prisma.transaction.create({
+					data: u
+				}),
+				prisma.ledger.update({
+					where: {
+						name: 'Caixa Geral de Depósitos'
+					},
+					data: {
+						totalValue: {
+							increment: u.value
+						}
+					}
+				})
+			]
+		)
 		console.log(t);
 	}
 
@@ -129,7 +123,7 @@ async function main() {
 			},
 			date: faker.date.between({from: '2017-01-01T00:00:00.000Z', to: "2023-07-31T00:00:00.000Z"}),
 			description: faker.finance.transactionDescription(),
-			value: 2000,
+			value: faker.number.float({ min: -100000, max: 100000, precision: 0.01 }),
 			Ledger: {
 				connect: { cardNumber: '1234567890123457' }
 			},
@@ -139,9 +133,23 @@ async function main() {
 	}
 
 	for (const u of trans) {
-		const t = await prisma.transaction.create({
-			data: u
-		});
+		const t = await prisma.$transaction(
+			[
+				prisma.transaction.create({
+					data: u
+				}),
+				prisma.ledger.update({
+					where: {
+						name: 'Novo Banco'
+					},
+					data: {
+						totalValue: {
+							increment: u.value
+						}
+					}
+				})
+			]
+		)
 		console.log(t);
 	}
 }

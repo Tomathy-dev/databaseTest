@@ -1,6 +1,8 @@
 import { prisma } from '$lib/server/prisma';
+import { Prisma } from '@prisma/client';
 import { error, fail } from '@sveltejs/kit';
 import type { PageServerLoad, RequestEvent, Actions } from './$types';
+
 
 export const actions: Actions = {
 	addTransaction: async ({ request }: RequestEvent) => {
@@ -14,7 +16,7 @@ export const actions: Actions = {
 		const bank = data.get('bank')?.toString();
 		let matter = 0;
 		let file = 0;
-		if(!fileMatter || !date || !description || !method || !exchange) {
+		if(!fileMatter || !date || !description || !method || !exchange || !bank || !value) {
 			return fail(400, { message: 'Missing required fields' });
 		}
 		const temp = fileMatter?.toString().split('-');
@@ -46,15 +48,6 @@ export const actions: Actions = {
 } satisfies Actions;
 
 export const load = (async ({ params }) => {
-	const ledger = await prisma.transaction.findMany({
-		take: 20,
-		orderBy: {
-			date: 'desc'
-		}
-	});
-	if (!ledger.length) {
-		throw error(404, 'Ledger not found');
-	}
 	const bank = await prisma.ledger.findFirst({
 		where: {
 			cardNumber: {
@@ -64,6 +57,18 @@ export const load = (async ({ params }) => {
 	});
 	if (!bank) {
 		throw error(404, 'Bank not found');
+	}
+	const ledger = await prisma.transaction.findMany({
+		take: 20,
+		where: {
+			bank: bank.name
+		},
+		orderBy: {
+			date: 'desc'
+		}
+	});
+	if (!ledger.length) {
+		throw error(404, 'Ledger not found');
 	}
 	return {
 		ledger: ledger,

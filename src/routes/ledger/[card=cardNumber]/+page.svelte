@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { beforeNavigate } from '$app/navigation';
+	import { beforeNavigate, invalidateAll } from '$app/navigation';
 	import { page } from '$app/stores';
 	import Icon from '@iconify/svelte';
 	import { fade, scale, blur } from 'svelte/transition';
@@ -8,7 +8,7 @@
 	let selected: Number[] = [];
 	let allselected = false;
 	let color_picker = false;
-	let addingTransaction = true;
+	let addingTransaction = false;
 	let exchange = "Debit";
 
 	const heading = ['File-Matter', 'Date', 'Method', 'Description', 'Debit', 'Credit'];
@@ -48,6 +48,18 @@
 			}
 		});
 		return response;
+	}
+
+	async function deleteData(){
+		const response = await fetch('../transaction', {
+			method: 'DELETE',
+			body: JSON.stringify(selected),
+			headers: {
+				'Content-Type': 'application/json'
+			}
+		});
+		selected = [];
+		invalidateAll();
 	}
 
 	$: ledger = data.ledger;
@@ -215,6 +227,8 @@
 					type="button"
 					class="btn-icon hover:variant-filled-surface"
 					transition:scale={{ duration: 200, start: 0 }}
+					on:click={deleteData}
+					on:keypress
 				>
 					<Icon icon="material-symbols:delete-outline" class="text-3xl" />
 				</button>

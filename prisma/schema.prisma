@@ -39,7 +39,7 @@ model Transaction {
   date              DateTime
   transactionMethod String
   description       String
-  value             Float
+  value             Decimal @db.Decimal(11, 2)
   Ledger            Ledger  @relation(fields: [bank], references: [name])
   bank              String
   color             String?
@@ -48,6 +48,6 @@ model Transaction {
 model Ledger {
   cardNumber  String        @id
   name        String        @unique
-  totalValue  Float
+  totalValue  Decimal       @db.Decimal(11, 2)
   Transaction Transaction[]
 }

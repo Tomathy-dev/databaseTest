@@ -33,7 +33,7 @@ export async function PUT({ request }: RequestEvent) {
 	return new Response(null, { status: 204 });
 }
 
-export async function DELETE({request}: RequestEvent) {
+export async function DELETE({ request }: RequestEvent) {
 	const data = await request.json();
 	if (data == null) {
 		return json({ status: 400 });
@@ -47,16 +47,26 @@ export async function DELETE({request}: RequestEvent) {
 						id: data[i]
 					}
 				});
+				const oldValue = await tx.ledger.findUnique({
+					where: {
+						name: temp?.bank
+					},
+					select: {
+						totalValue: true
+					}
+				});
+
+				if (!temp || !oldValue) {
+					return fail(400, { message: 'Invalid data' });
+				}
 				await tx.ledger.update({
 					where: {
 						name: temp?.bank
 					},
 					data: {
-						totalValue: {
-							decrement: temp?.value
-						}
+						totalValue: oldValue?.totalValue - temp?.value
 					}
-				})
+				});
 				await tx.transaction.delete({
 					where: {
 						id: data[i]
@@ -66,7 +76,7 @@ export async function DELETE({request}: RequestEvent) {
 		});
 	} catch (error) {
 		console.log(error);
-		return fail(500, { message: 'Internal server error' }); 
+		return fail(500, { message: 'Internal server error' });
 	}
 
 	return new Response(null, { status: 204 });

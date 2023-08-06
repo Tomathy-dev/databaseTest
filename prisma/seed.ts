@@ -44,13 +44,11 @@ async function main() {
 	const addedLedgers: Prisma.LedgerCreateInput[] = [
 		{
 			cardNumber: '1234567890123456',
-			name: 'Caixa Geral de Depósitos',
-			totalValue: 0
+			name: 'Caixa Geral de Depósitos'
 		},
 		{
 			cardNumber: '1234567890123457',
-			name: 'Novo Banco',
-			totalValue: 0
+			name: 'Novo Banco'
 		}
 	];
 	await Promise.all(
@@ -76,9 +74,12 @@ async function main() {
 					}
 				}
 			},
-			date: faker.date.between({from: '2017-01-01T00:00:00.000Z', to: "2023-07-31T00:00:00.000Z"}),
+			date: faker.date.between({
+				from: '2017-01-01T00:00:00.000Z',
+				to: '2023-07-31T00:00:00.000Z'
+			}),
 			description: faker.finance.transactionDescription(),
-			value: faker.number.float({ min: -100000, max: 100000, precision: 0.01 }),
+			value: faker.number.bigInt({ min: -50000000n, max: 50000000n }),
 			Ledger: {
 				connect: { cardNumber: '1234567890123456' }
 			},
@@ -89,23 +90,28 @@ async function main() {
 	}
 
 	for (const u of trans) {
-		const t = await prisma.$transaction(
-			[
-				prisma.transaction.create({
-					data: u
-				}),
-				prisma.ledger.update({
-					where: {
-						name: 'Caixa Geral de Depósitos'
-					},
-					data: {
-						totalValue: {
-							increment: u.value
-						}
-					}
-				})
-			]
-		)
+		const ledger = await prisma.ledger.findUnique({
+			where: {
+				cardNumber: '1234567890123456'
+			},
+			select: {
+				totalValue: true
+			}
+		});
+		if (!ledger) throw new Error('Ledger not found');
+		const t = await prisma.$transaction([
+			prisma.transaction.create({
+				data: u
+			}),
+			prisma.ledger.update({
+				where: {
+					name: 'Caixa Geral de Depósitos'
+				},
+				data: {
+					totalValue: ledger.totalValue + BigInt(u.value)
+				}
+			})
+		]);
 		console.log(t);
 	}
 
@@ -121,9 +127,12 @@ async function main() {
 					}
 				}
 			},
-			date: faker.date.between({from: '2017-01-01T00:00:00.000Z', to: "2023-07-31T00:00:00.000Z"}),
+			date: faker.date.between({
+				from: '2017-01-01T00:00:00.000Z',
+				to: '2023-07-31T00:00:00.000Z'
+			}),
 			description: faker.finance.transactionDescription(),
-			value: faker.number.float({ min: -100000, max: 100000, precision: 0.01 }),
+			value: faker.number.bigInt({ min: -50000000n, max: 50000000n }),
 			Ledger: {
 				connect: { cardNumber: '1234567890123457' }
 			},
@@ -133,23 +142,28 @@ async function main() {
 	}
 
 	for (const u of trans) {
-		const t = await prisma.$transaction(
-			[
-				prisma.transaction.create({
-					data: u
-				}),
-				prisma.ledger.update({
-					where: {
-						name: 'Novo Banco'
-					},
-					data: {
-						totalValue: {
-							increment: u.value
-						}
-					}
-				})
-			]
-		)
+		const ledger = await prisma.ledger.findUnique({
+			where: {
+				cardNumber: '1234567890123457'
+			},
+			select: {
+				totalValue: true
+			}
+		});
+		if (!ledger) throw new Error('Ledger not found');
+		const t = await prisma.$transaction([
+			prisma.transaction.create({
+				data: u
+			}),
+			prisma.ledger.update({
+				where: {
+					name: 'Novo Banco'
+				},
+				data: {
+					totalValue: ledger.totalValue + BigInt(u.value)
+				}
+			})
+		]);
 		console.log(t);
 	}
 }

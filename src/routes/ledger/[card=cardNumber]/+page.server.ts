@@ -1,8 +1,6 @@
 import { prisma } from '$lib/server/prisma';
-import { Prisma } from '@prisma/client';
 import { error, fail } from '@sveltejs/kit';
 import type { PageServerLoad, RequestEvent, Actions } from './$types';
-
 
 export const actions: Actions = {
 	addTransaction: async ({ request }: RequestEvent) => {
@@ -16,20 +14,20 @@ export const actions: Actions = {
 		const bank = data.get('bank')?.toString();
 		let matter = 0;
 		let file = 0;
-		if(!fileMatter || !date || !description || !method || !exchange || !bank || !value) {
+		if (!fileMatter || !date || !description || !method || !exchange || !bank || !value) {
 			return fail(400, { message: 'Missing required fields' });
 		}
 		const temp = fileMatter?.toString().split('-');
 		file = parseInt(temp[0]);
-		if(temp.length === 2){
+		if (temp.length === 2) {
 			matter = parseInt(temp[1]);
 		}
-		if(exchange.toString() === 'Debit') {
+		if (exchange.toString() === 'Debit') {
 			value *= -1;
 		}
-		
+
 		console.log(file, matter, date, description, value, method, bank);
-		try{
+		try {
 			await prisma.transaction.create({
 				data: {
 					file: file,
@@ -41,10 +39,10 @@ export const actions: Actions = {
 					bank: bank
 				}
 			});
-		} catch (e){
-			return fail(400, { message: 'Invalid data' })
+		} catch (e) {
+			return fail(400, { message: 'Invalid data' });
 		}
-	},
+	}
 } satisfies Actions;
 
 export const load = (async ({ params }) => {
@@ -59,7 +57,6 @@ export const load = (async ({ params }) => {
 		throw error(404, 'Bank not found');
 	}
 	const ledger = await prisma.transaction.findMany({
-		take: 20,
 		where: {
 			bank: bank.name
 		},

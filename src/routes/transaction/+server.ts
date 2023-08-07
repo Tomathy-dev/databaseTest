@@ -1,4 +1,4 @@
-import { fail, json, type RequestEvent } from '@sveltejs/kit';
+import { error, json, type RequestEvent } from '@sveltejs/kit';
 
 export async function PUT({ request }: RequestEvent) {
 	const data = await request.json();
@@ -18,16 +18,16 @@ export async function PUT({ request }: RequestEvent) {
 						matter: data[i].matter,
 						date: data[i].date,
 						description: data[i].description,
-						value: data[i].value,
+						value: BigInt(data[i].value),
 						transactionMethod: data[i].transactionMethod,
 						color: data[i].color
 					}
 				});
 			}
 		});
-	} catch (error) {
-		console.log(error);
-		return fail(500, { message: 'Internal server error' });
+	} catch (e) {
+		console.log(e);
+		return error(500, { message: 'Internal server error' });
 	}
 
 	return new Response(null, { status: 204 });
@@ -57,7 +57,7 @@ export async function DELETE({ request }: RequestEvent) {
 				});
 
 				if (!temp || !oldValue) {
-					return fail(400, { message: 'Invalid data' });
+					return error(400, { message: 'Invalid data' });
 				}
 				await tx.ledger.update({
 					where: {
@@ -74,9 +74,9 @@ export async function DELETE({ request }: RequestEvent) {
 				});
 			}
 		});
-	} catch (error) {
-		console.log(error);
-		return fail(500, { message: 'Internal server error' });
+	} catch (e) {
+		console.log(e);
+		return error(500, { message: 'Internal server error' });
 	}
 
 	return new Response(null, { status: 204 });

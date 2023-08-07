@@ -1,29 +1,48 @@
 import { prisma } from '$lib/server/prisma';
 import { error, fail } from '@sveltejs/kit';
 import type { PageServerLoad, RequestEvent, Actions } from './$types';
+import {z} from 'zod';
+import {superValidate} from 'sveltekit-superforms/server'
+
+const addTransactionSchema = z.object({
+	file: z.string().regex(/^[0-9]{1,5}-[0-9]{2}$/g),
+	date: z.string(),
+	description: z.string(),
+	method: z.date(),
+	value: z.string(),
+	bank: z.string()
+});
 
 export const actions: Actions = {
 	addTransaction: async ({ request }: RequestEvent) => {
-		const data = await request.formData();
-		const fileMatter = data.get('file');
-		const date = data.get('date')?.toString();
-		const description = data.get('description')?.toString();
-		const method = data.get('method')?.toString();
-		let value = parseFloat(data.get('value')?.toString() || '0');
-		const exchange = data.get('exchange')?.toString();
-		const bank = data.get('bank')?.toString();
+		const form = await superValidate(request, addTransactionSchema);
+		if(!form.valid) return fail(400, {form});
 		let matter = 0;
 		let file = 0;
-		if (!fileMatter || !date || !description || !method || !exchange || !bank || !value) {
-			return fail(400, { message: 'Missing required fields' });
+		let value = 0n;
+		if (!fileMatter || !date || !description || !method || !bank || !value) {
+			return error(400, { message: 'Missing required fields' });
 		}
+
 		const temp = fileMatter?.toString().split('-');
 		file = parseInt(temp[0]);
+
 		if (temp.length === 2) {
 			matter = parseInt(temp[1]);
 		}
-		if (exchange.toString() === 'Debit') {
-			value *= -1;
+		
+		if(string_value === null || string_value === undefined) {
+			return error(400, { message: 'Invalid value' });
+		}
+
+		if(string_value.includes('.')) {
+			string_value = string_value.replace('.', '');
+		}
+
+		value = BigInt(string_value);
+
+		if(value === 0n || value === -0n) {
+			return error(400, { message: 'Invalid value' });
 		}
 
 		console.log(file, matter, date, description, value, method, bank);
@@ -40,12 +59,13 @@ export const actions: Actions = {
 				}
 			});
 		} catch (e) {
-			return fail(400, { message: 'Invalid data' });
+			return error(400, { message: 'Invalid data' });
 		}
 	}
 } satisfies Actions;
 
 export const load = (async ({ params }) => {
+	const form = superValidate(addTransactionSchema);
 	const bank = await prisma.ledger.findFirst({
 		where: {
 			cardNumber: {
@@ -57,6 +77,7 @@ export const load = (async ({ params }) => {
 		throw error(404, 'Bank not found');
 	}
 	const ledger = await prisma.transaction.findMany({
+		take: 20,
 		where: {
 			bank: bank.name
 		},
@@ -68,6 +89,7 @@ export const load = (async ({ params }) => {
 		throw error(404, 'Ledger not found');
 	}
 	return {
+		form,
 		ledger: ledger,
 		bank: {
 			name: bank.name,

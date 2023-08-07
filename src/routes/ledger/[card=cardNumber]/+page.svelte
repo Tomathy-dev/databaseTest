@@ -62,6 +62,21 @@
 		invalidateAll();
 	}
 
+	function showBigInt(value: bigint) {
+		if (value < BigInt(0)) {
+			value = value * BigInt(-1);
+			let left = value.toString().substring(0, value.toString().length - 2);
+			let right = value.toString().substring(value.toString().length - 2);
+			left = left.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+			return left + '.' + right + '€';
+		} else {
+			let left = value.toString().substring(0, value.toString().length - 2);
+			let right = value.toString().substring(value.toString().length - 2);
+			left = left.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+			return left + '.' + right + '€';
+		}
+	}
+
 	$: ledger = data.ledger;
 	$: bank = data.bank;
 </script>
@@ -160,7 +175,7 @@
 		<h3 class="h3 text-4xl font-bold py-4">{bank.name} - {$page.params.card}</h3>
 		<div class="flex flex-row gap-4 items-center grow justify-end">
 			<span class="text-xl">Balance:</span>
-			<span class="text-3xl font-bold">{bank.totalValue}€</span>
+			<span class="text-3xl font-bold">{showBigInt(bank.totalValue)}</span>
 		</div>
 	</div>
 	<div
@@ -342,14 +357,14 @@
 							{#if l.value > 0n}
 								-
 							{:else}
-								{0n - l.value}
+								{showBigInt(l.value)}
 							{/if}
 						</td>
 						<td>
 							{#if l.value < 0n}
 								-
 							{:else}
-								{l.value}
+								{showBigInt(l.value)}
 							{/if}
 						</td>
 					</tr>

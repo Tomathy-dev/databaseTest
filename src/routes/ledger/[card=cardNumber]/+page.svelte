@@ -65,15 +65,27 @@
 	function showBigInt(value: bigint) {
 		if (value < BigInt(0)) {
 			value = value * BigInt(-1);
-			let left = value.toString().substring(0, value.toString().length - 2);
-			let right = value.toString().substring(value.toString().length - 2);
+			const s = handleDecimals(value);
+			let left = s.substring(0, s.length - 2);
+			let right = s.substring(s.length - 2);
 			left = left.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 			return left + '.' + right + '€';
 		} else {
-			let left = value.toString().substring(0, value.toString().length - 2);
-			let right = value.toString().substring(value.toString().length - 2);
+			const s = handleDecimals(value);
+			let left = s.substring(0, s.length - 2);
+			let right = s.substring(s.length - 2);
 			left = left.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 			return left + '.' + right + '€';
+		}
+	}
+
+	function handleDecimals(value: bigint){
+		if(value < BigInt(10)){
+			return '00' + value.toString();
+		} else if(value < BigInt(100) && value >= BigInt(10)){
+			return '0' + value.toString();
+		} else {
+			return value.toString();
 		}
 	}
 
@@ -81,6 +93,7 @@
 	$: bank = data.bank;
 </script>
 
+<!-- Modal for adding transactions-->
 {#if addingTransaction}
 	<div
 		class="w-screen h-screen absolute left-0 flex justify-center items-center"
@@ -121,7 +134,7 @@
 					</div>
 					<div class="flex flex-col gap-2">
 						<label for="credit">Value (€)</label>
-						<input type="number" name="value" id="value" class="input" />
+						<input type="number" name="value" id="value" class="input" step=".01" min="0"/>
 					</div>
 					<div class="row-start-3 col-start-3 flex flex-row gap-2">
 						<span
@@ -158,7 +171,10 @@
 	</div>
 {/if}
 
+<!--Screen-->
 <div class="p-5 flex flex-col relative translate-x-0">
+
+	<!--Header-->
 	<div class="flex flex-row gap-8 items-center">
 		<h1 class="text-6xl font-bold">Ledger</h1>
 		<div class="flex flex-row items-center">
@@ -171,6 +187,8 @@
 			<button type="button" class="btn bg-secondary-500 h-10 w-60">+ Add Ledger</button>
 		</div>
 	</div>
+
+	<!--SubHeader-->
 	<div class="mt-6 w-full flex card flex-row px-4">
 		<h3 class="h3 text-4xl font-bold py-4">{bank.name} - {$page.params.card}</h3>
 		<div class="flex flex-row gap-4 items-center grow justify-end">
@@ -178,37 +196,65 @@
 			<span class="text-3xl font-bold">{showBigInt(bank.totalValue)}</span>
 		</div>
 	</div>
+
+	<!--Start of table-->
+	<!--Sticky part of table-->
 	<div
-		class="bg-surface-200-700-token px-2 py-2 sticky top-0 grid grid-cols-[1fr_auto] mt-6 rounded-t-md mb-[-5px]"
+		class="bg-surface-200-700-token px-2 py-2 sticky top-0 grid grid-cols-[1fr_2fr_1fr] mt-6 rounded-t-md mb-[-5px]"
 	>
+
 		<!-- Permanent Buttons -->
 		<div class="flex gap-2">
 			<button
-				type="button"
-				class="btn-icon hover:variant-filled-surface"
-				on:click={() => (addingTransaction = true)}
+			type="button"
+			class="btn-icon hover:variant-filled-surface"
+			on:click={() => (addingTransaction = true)}
 			>
-				<Icon icon="material-symbols:add-circle-outline" class="text-3xl" />
+			<Icon icon="material-symbols:add-circle-outline" class="text-3xl" />
 			</button>
 			<button type="button" class="btn-icon hover:variant-filled-surface" on:click={sendData}>
 				<Icon icon="material-symbols:save" class="text-3xl" />
 			</button>
-			<button type="button" class="btn-icon hover:variant-filled-surface">
+			<button type="button" class="btn-icon hover:variant-filled-surface" aria-label="Filter Transactions">
 				<Icon icon="material-symbols:filter-alt-sharp" class="text-3xl" />
 			</button>
 		</div>
-		<div class="flex gap-2">
-			<!-- Selected Buttons and Search Bar -->
+		
+
+		<div class="flex gap-2 justify-center items-center">
+			<!--Search Bar-->
+			<form action="/search" class="flex w-100 right-0">
+				<div class="input-group input-group-divider grid-cols-[1fr_3fr_auto]">
+					<select name="filter" id="filter" class="select">
+						<option value="file">File</option>
+						<option value="date">Date</option>
+						<option value="method">Method</option>
+						<option value="description">Description</option>
+						<option value="value">Value</option>
+					</select>
+					<input type="text" name="file" class="input rounded-r-none" placeholder="File..." />
+					<button type="button" class="btn variant-filled-tertiary rounded-l-none text-xl">
+						<span><Icon icon="material-symbols:search" /></span>
+					</button>
+				</div>
+			</form>
+		</div>
+
+		<!-- Selected Buttons and Search Bar -->
+		<div class="flex gap-2 justify-end relative">
 			{#if selected.length > 0}
+			<!--Deselect-->
 				<button
 					type="button"
 					class="btn-icon hover:variant-filled-surface relative"
 					transition:scale={{ duration: 200, start: 0 }}
-					on:click={() => (selected = [])}
+					on:click={() => {selected = []; allselected = false}}
 				>
 					<Icon icon="material-symbols:remove-selection" class="text-3xl" />
 				</button>
-				<div class="relative">
+
+				<!--Color Transactions-->
+				<div class="absolute left-0">
 					<button
 						type="button"
 						class="btn-icon hover:variant-filled-surface relative"
@@ -299,9 +345,11 @@
 						</div>
 					{/if}
 				</div>
+
+				<!--Delete-->
 				<button
 					type="button"
-					class="btn-icon hover:variant-filled-surface"
+					class="btn-icon hover:variant-filled-error"
 					transition:scale={{ duration: 200, start: 0 }}
 					on:click={deleteData}
 					on:keypress
@@ -309,17 +357,14 @@
 					<Icon icon="material-symbols:delete-outline" class="text-3xl" />
 				</button>
 			{/if}
-			<form action="/search" class="flex w-96 right-0">
-				<div class="input-group input-group-divider grid-cols-[3fr_1fr_auto]">
-					<input type="text" name="file" class="input rounded-r-none" placeholder="File..." />
-					<input type="text" name="matter" class="input rounded-l-none" placeholder="Matter..." />
-					<button type="button" class="btn variant-filled-tertiary rounded-l-none text-xl">
-						<span><Icon icon="material-symbols:search" /></span>
-					</button>
-				</div>
-			</form>
+
 		</div>
+
+		
+
 	</div>
+
+	<!-- Transaction Table -->
 	<div class="table-container">
 		<table class="table table-hover rounded-b-lg overflow-x-auto table-auto">
 			<thead class="table-head">
@@ -330,6 +375,7 @@
 							class="checkbox w-6 h-6 bg-surface-50-900-token"
 							on:click={selectAll}
 							on:keydown={selectAll}
+							bind:checked={allselected}
 						/></th
 					>
 					{#each heading as h}

@@ -9,6 +9,19 @@ export async function PUT({ request }: RequestEvent) {
 	try {
 		await prisma.$transaction(async (tx) => {
 			for (let i = 0; i < data.length; i++) {
+				const oldTransactionValue = await tx.transaction.findUnique({
+					where: {
+						id: data[i].id
+					},
+					select: {
+						value: true
+					}
+				});
+
+				if (!oldTransactionValue) {
+					return error(400, { message: 'Invalid id' });
+				}
+
 				await tx.transaction.update({
 					where: {
 						id: data[i].id
@@ -21,6 +34,28 @@ export async function PUT({ request }: RequestEvent) {
 						value: BigInt(data[i].value),
 						transactionMethod: data[i].transactionMethod,
 						color: data[i].color
+					}
+				});
+
+				const oldValue = await tx.ledger.findUnique({
+					where: {
+						name: data[i].bank
+					},
+					select: {
+						totalValue: true
+					}
+				});
+
+				if (!oldValue) {
+					return error(400, { message: 'Invalid bank' });
+				}
+
+				await tx.ledger.update({
+					where: {
+						name: data[i].bank
+					},
+					data: {
+						totalValue: oldValue?.totalValue - oldTransactionValue.value + BigInt(data[i].value)
 					}
 				});
 			}

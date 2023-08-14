@@ -16,8 +16,9 @@
 <Drawer />
 
 <AppShell>
+	<svelte:fragment slot="header">Header</svelte:fragment>
 	<svelte:fragment slot="sidebarLeft">
-		<Nav class="w-[90px]" />
+		<Nav />
 	</svelte:fragment>
 	<slot />
 </AppShell>
@@ -34,7 +35,7 @@
 	}
 
 	:global(::-webkit-scrollbar) {
-		width: 7px;
+		width: 10	px;
 	}
 
 	:global(::-webkit-scrollbar-track) {

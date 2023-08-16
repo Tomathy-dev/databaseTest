@@ -10,13 +10,21 @@
 	// Finally, your application's global stylesheet (sometimes labeled 'app.css')
 	import '../app.postcss';
 	import { AppShell, Drawer, Modal } from '@skeletonlabs/skeleton';
+	import SearchFiles from '$lib/components/SearchFiles.svelte';
 </script>
 
 <Modal />
 <Drawer />
 
 <AppShell>
-	<svelte:fragment slot="header">Header</svelte:fragment>
+	<svelte:fragment slot="header">
+		<div class="grid grid-cols-[auto_350px] p-2 shadow-md">
+			<div class="flex items-center">
+				<span class="title text-3xl">EDGE DATABASE</span>
+			</div>
+			<SearchFiles/>
+		</div>
+	</svelte:fragment>
 	<svelte:fragment slot="sidebarLeft">
 		<Nav />
 	</svelte:fragment>
@@ -29,7 +37,7 @@
 	:global(body, html) {
 		margin: 0;
 		padding: 0;
-		font-family: 'Roboto', sans-serif;
+		font-family: 'Inter', sans-serif;
 		font-weight: normal;
 		height: 100vh;
 	}
@@ -56,4 +64,9 @@
 		appearance: textfield;
 		-moz-appearance: textfield;
 	}
+
+.title{
+	font-family: 'Readex Pro', sans-serif;
+	font-weight: 500;
+}
 </style>

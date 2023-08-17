@@ -1,0 +1,4 @@
+TODO List (short-term):
+- put comma on values in the client;
+- figure out how to send bigint through form (probably string it);
+- 

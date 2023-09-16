@@ -11,24 +11,29 @@ let transac: Prisma.TransactionCreateInput;
 const options = ['primary', 'secondary', 'tertiary', 'success', 'warning', 'error'];
 
 async function main() {
-	for (let i = 0; i < 1000; i++) {
+	for (let i = 0; i < 100; i++) {
+		const matters: any[]= [];
+		for(let j = 0; j < faker.number.int({ min: 1, max: 5 }); j++) {
+			matters.push({
+				matter: j + 1,
+				department: faker.commerce.department(),
+				inCharge: faker.person.firstName(),
+				openDate: faker.date.between({
+					from: '2017-01-01T00:00:00.000Z',
+					to: '2023-07-31T00:00:00.000Z'
+				}),
+			});
+		}
 		gamer = {
 			name: faker.person.fullName(),
 			email: faker.internet.email(),
 			personal: Math.random() < 0.5,
+			openDate: faker.date.between({
+				from: '2017-01-01T00:00:00.000Z',
+				to: '2023-07-31T00:00:00.000Z'
+			}),
 			matters: {
-				create: [
-					{
-						matter: 1,
-						department: faker.commerce.department(),
-						inCharge: faker.person.firstName()
-					},
-					{
-						matter: 2,
-						department: faker.commerce.department(),
-						inCharge: faker.person.firstName()
-					}
-				]
+				create: matters
 			}
 		};
 		users.push(gamer);
@@ -59,18 +64,26 @@ async function main() {
 		})
 	);
 
-	for (let i = 0; i < 500; i++) {
+	for (let i = 0; i < 100; i++) {
 		const random = faker.number.int({ min: 0, max: 100 });
 		let color = '';
 		if (random > 60) {
 			color = options[Math.floor(Math.random() * options.length)];
 		}
+		const file_number = faker.number.int({ min: 1, max: 100 });
+		const number_matters = await prisma.file.findUnique({
+			 where: { id: file_number },
+			 include:{
+				matters: true
+			}
+		});
+		console.log(number_matters);
 		transac = {
 			matterRelation: {
 				connect: {
 					fileId_matter: {
-						fileId: faker.number.int({ min: 1, max: 1000 }),
-						matter: faker.number.int({ min: 1, max: 2 })
+						fileId: file_number,
+						matter: faker.number.int({ min: 1, max: number_matters?.matters.length })
 					}
 				}
 			},
@@ -112,18 +125,24 @@ async function main() {
 				}
 			})
 		]);
-		console.log(t);
 	}
 
 	trans.length = 0;
 
-	for (let i = 0; i < 500; i++) {
+	for (let i = 0; i < 100; i++) {
+		const random = faker.number.int({ min: 0, max: 100 });
+		let color = '';
+		if (random > 60) {
+			color = options[Math.floor(Math.random() * options.length)];
+		}
+		const file_number = faker.number.int({ min: 1, max: 100 });
+		const number_matters = await prisma.file.findUnique({ where: { id: file_number }, include:{matters: true}});
 		transac = {
 			matterRelation: {
 				connect: {
 					fileId_matter: {
-						fileId: faker.number.int({ min: 1, max: 1000 }),
-						matter: faker.number.int({ min: 1, max: 2 })
+						fileId: file_number,
+						matter: faker.number.int({ min: 1, max: number_matters?.matters.length	})
 					}
 				}
 			},
@@ -136,7 +155,8 @@ async function main() {
 			Ledger: {
 				connect: { cardNumber: '1234567890123457' }
 			},
-			transactionMethod: faker.finance.transactionType()
+			transactionMethod: faker.finance.transactionType(),
+			color: color
 		};
 		trans.push(transac);
 	}
@@ -164,7 +184,6 @@ async function main() {
 				}
 			})
 		]);
-		console.log(t);
 	}
 }
 

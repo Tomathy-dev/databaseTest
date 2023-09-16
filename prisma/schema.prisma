@@ -17,6 +17,8 @@ model File {
   phoneNumber  Int?
   personal     Boolean
   matter_final Int      @default(0)
+  balance      BigInt   @default(0) @db.BigInt
+  openDate     DateTime
   matters      Matter[]
 }
 
@@ -24,8 +26,10 @@ model Matter {
   file        File          @relation(fields: [fileId], references: [id])
   fileId      Int
   matter      Int
+  openDate    DateTime
   department  String
   inCharge    String
+  balance     BigInt        @default(0) @db.BigInt
   Transaction Transaction[]
 
   @@id([fileId, matter])
